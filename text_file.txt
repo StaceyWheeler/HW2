@@ -1,0 +1,6 @@
+This is a test file.
+It is not an email.
+Hopefully my program returns the result that it is
+not
+an
+email.

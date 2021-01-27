@@ -1,6 +1,12 @@
-#import pandas as pd
+import unittest
 import glob
 import pickle
+
+class EmailFormatError(Exception):
+	pass
+
+# class EmailFileTypeError(Exception):
+# 	pass
 
 
 #builds a set of all possible characters for domain
@@ -132,18 +138,44 @@ def add_word_to_dict(word, word_counts):
 		word_counts[word] = 1
 	return word_counts
 
+
+def raise_EmailFormatError(current_file):
+	headers = ['Date', 'Subject', 'From']
+	for header in headers:
+		if header in current_file:
+			continue
+		else:
+			raise EmailFormatError
+
 #returns a tuple containing a list of email addresses and a dictionary of word counts for the file
 def process_newsgroup_file(filepath, word_counts):
 	emails_list = []
 	with open(filepath, encoding='windows-1252') as current_file:
+		# if not filepath.endswith('.txt'):
+		# 	raise EmailFileTypeError
+		# from_header_bool = False
+		# subject_header_bool = False
+		# date_header_bool = False
+		raise_EmailFormatError(current_file.read())
+		current_file.seek(0)
 		for line in current_file:
 			line_list =  line.split()
+			# if line_list == []:
+			# 	raise EmailFormatError
+			# if 'From:' in line_list:
+			# 	from_header_bool = True
+			# if 'Subject:' in line_list:
+			# 	subject_header_bool = True
+			# if 'Date:' in line_list:
+			# 	date_header_bool = True
 			for word in line_list:
 				if check_email_validity(word):
 					emails_list.append(word)
 					continue
 				word = remove_special_characters(word)
 				add_word_to_dict(word, word_counts)
+		# if from_header_bool == False or subject_header_bool == False or date_header_bool == False:
+		# 	raise EmailFormatError
 	return(emails_list, word_counts)
 
 
@@ -162,7 +194,7 @@ def process_newsgroup_topic(dir_file_path):
 	with open('sci.crypt.emails.txt', 'w') as f:
 		for email in emails_list:
 			f.write('%s\n' % email)
-	with open('sci.crypt.wordcounts.txt', 'wb') as g:
+	with open('sci.crypt.wordcounts.pkl', 'wb') as g:
 		pickle.dump(word_list, g)
 
 	#return(emails_list, word_list)
@@ -174,19 +206,21 @@ def process_newsgroup_topic(dir_file_path):
 
 
 if __name__ == '__main__':
-	process_newsgroup_topic("/Users/stacey/Documents/DATA515/20_newsgroups/sci.crypt/*")
+	# (emails_list, word_list) = process_newsgroup_topic("/Users/stacey/Documents/DATA515/Newsgroup_repo/tests/test_FruitEmails/*")
+	# print(word_list)
+
 	
+	word_counts = {}
+	(emails_list, word_counts) = process_newsgroup_file('/Users/stacey/Documents/DATA515/Newsgroup_repo/tests/text_file.txt', word_counts)
+	print(word_counts)
+	print(emails_list)
+
+	# missing_at_symbol = 'personal.domain.com'
+	# print(check_email_validity(missing_at_symbol))
 
 
-
-
-
-	#  word_counts = {}
 	#  (emails_list,word_counts) = process_newsgroup_file('/Users/stacey/Downloads/20_newsgroups/sci.crypt/15400', word_counts)
 	#  print(emails_list)
-	#  with open('sci.crypt.emails.txt', 'w') as f:
-	# 	 for email in emails_list:
-	# 		 f.write('%s\n' % email)
 
 
 
